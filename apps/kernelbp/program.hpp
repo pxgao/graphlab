@@ -2,15 +2,13 @@
 #define KERNELBP_PROGRAM
 
 #include <limits>
+#include "global_parameters.hpp"
 
 class program : public ivertex_program<graph_type, gather_type>, public IS_POD_TYPE
 {
 protected:
 	// apply stores incoming messages in here (key is where the message is from)
 	map<vertex_id_type,VectorXd> message_map;
-	
-	static const float beta_epsilon=1E-5;
-
 
 public:
 	edge_dir_type gather_edges(icontext_type& context, const vertex_type& vertex) const
@@ -253,7 +251,7 @@ public:
 			difference=(new_beta-edge.data().beta).norm();
 
 		cout << "beta norm difference is " << difference << endl;
-		if (difference>beta_epsilon)
+		if (difference>BETA_EPSILON)
 		{
 			// store new message and signal depending node if beta has changed or has not yet existed
 			edge.data().beta=new_beta;

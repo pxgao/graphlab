@@ -11,9 +11,10 @@ using namespace std;
 #include <Eigen/Dense>
 using namespace Eigen;
 
-#include "stream_operators.hpp"
+//#include "stream_operators.hpp"
 #include "ascii_matrix_loader.hpp"
 #include "graph_type.hpp"
+#include "global_parameters.hpp"
 
 bool line_parser(graph_type& graph, const string& filename, const string& textline)
 {
@@ -56,15 +57,11 @@ bool line_parser(graph_type& graph, const string& filename, const string& textli
 				strm >> filename;
 				cout << "filename=" << filename << endl;
 			
-				MatrixXd K=load_ascii_matrix(filename);
+				MatrixXd K=load_ascii_matrix(filename, GRAPH_DIR);
 				
 				// add kernel to inner map
 				n.kernel_dict[pair<vertex_id_type,vertex_id_type>(vid_source,vid_target)]=K;
 				cout << "K_" << vid << "^(" << vid_source << "," << vid_target << "):" << endl << K << endl;
-				
-				//// exploit symmetry, note that transpose() returns object on same memory
-				//n.kernel_dict[pair<vertex_id_type,vertex_id_type>(vid_target,vid_source)]=K.transpose();
-				//cout << "K_" << vid << "^(" << vid_target << "," << vid_source << "):" << endl << K.transpose() << endl;
 			}
 		}
 		else if (!type.compare("observed_node"))
@@ -85,8 +82,9 @@ bool line_parser(graph_type& graph, const string& filename, const string& textli
 				strm >> filename;
 				cout << "filename=" << filename << endl;
 			
-				VectorXd kernel=load_ascii_matrix(filename);
+				VectorXd kernel=load_ascii_matrix(filename, GRAPH_DIR);
 				n.kernel_dict_obs[vid_source]=kernel;
+				cout << "k_" << vid << ": " << kernel << endl;
 			}
 		}
 
@@ -102,7 +100,6 @@ bool line_parser(graph_type& graph, const string& filename, const string& textli
 		vertex_id_type target;
 		strm >> source;
 		strm >> target;
-		cout << source << "->" << target << endl;
 		
 		// read all precomputed systems' matrices
 		while (true)
@@ -114,8 +111,9 @@ bool line_parser(graph_type& graph, const string& filename, const string& textli
 			if (strm.fail())
 				break;
 				
-			cout << name << ": " << filename << endl;
-			e.solution_matrices[name]=load_ascii_matrix(filename);
+			MatrixXd M=load_ascii_matrix(filename, GRAPH_DIR);
+			e.solution_matrices[name]=M;
+			cout << name << ": " << filename << ": " << M << endl;
 		}
 		
 		// in case of full rank there is a cholesky factor
@@ -138,7 +136,7 @@ bool line_parser(graph_type& graph, const string& filename, const string& textli
 		cout << "type=" << type << " is unknown!" << endl;
 	}
 	
-	cout << endl;
+	// cout << endl;
 	return true;
 }
 
