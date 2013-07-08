@@ -11,8 +11,8 @@ using namespace std;
 #include <Eigen/Dense>
 using namespace Eigen;
 
-#include "../stream_operators.hpp"
-#include "../ascii_matrix_loader.hpp"
+#include "stream_operators.hpp"
+#include "ascii_matrix_loader.hpp"
 #include "graph_type.hpp"
 
 bool line_parser(graph_type& graph, const string& filename, const string& textline)

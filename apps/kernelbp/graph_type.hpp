@@ -12,8 +12,8 @@ using namespace std;
 #include <Eigen/Dense>
 using namespace Eigen;
 
-#include "../stream_operators.hpp"
-#include "../ascii_matrix_loader.hpp"
+#include "stream_operators.hpp"
+#include "ascii_matrix_loader.hpp"
 
 struct node_data
 {
