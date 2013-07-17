@@ -45,15 +45,10 @@ can be loaded by the provided line reader of our Graphlab Kernel-BP
 implementation. See documentation for details.
 """
 
-from numpy.lib.twodim_base import eye
-from numpy.linalg.linalg import cholesky
-from numpy.ma.core import shape, reshape
 from numpy.random import randint
-from sets import Set
 from src.GaussianKernel import GaussianKernel
-from src.GraphlabLines import GraphlabLines
+from src.PrecomputeDenseMatrixKernelBP import PrecomputeDenseMatrixKernelBP
 from src.ToyModel import ToyModel
-import os.path
 
 model=ToyModel()
 graph=model.get_moralised_graph()
@@ -67,7 +62,6 @@ edges=model.extract_edges(observations)
 print "graph:", graph
 print "observations:", observations
 print "edges:", edges
-
 
 # sample data, random number of samples for each edge
 n_min=5
@@ -88,89 +82,8 @@ for edge in edges:
 # compute all (here Gaussian) kernels of node data at edges with themselves
 kernel=GaussianKernel(sigma=1)
 
-# collect lines for Graphlab graph definition file for full rank case
-graphlab_lines=GraphlabLines(output_filename="graph/graph.txt", \
-                             caller_filename=os.path.basename(__file__))
-                                    
-# compute all non-symmetric kernels for incoming messages at a node
-print "precomputing (non-symmetric) kernels for incoming messages at a node"
-graphlab_lines.lines.append("# non-observed nodes")
-for node in graph:
-    added_node=False
-    
-    for in_message in graph[node]:
-        for out_message in graph[node]:
-            if in_message==out_message:
-                continue
-            
-            # dont add nodes which have no kernels, and only do once if they have
-            if not added_node:
-                graphlab_lines.new_non_observed_node(node)
-                added_node=True
-                
-            edge_in_message=(node, in_message)
-            edge_out_message=(out_message, node)
-            
-            lhs=data[edge_in_message][0]
-            rhs=data[edge_out_message][1]
-            lhs=reshape(lhs, (len(lhs),1))
-            rhs=reshape(rhs, (len(rhs),1))
-            K=kernel.kernel(lhs,rhs)
-            graphlab_lines.add_non_observed_node(node, out_message, in_message, K)
-    
-print "precomputing kernel (vectors) at observed nodes"
-graphlab_lines.lines.append(os.linesep + "# observed nodes")
-for node, observation in observations.items():
-    graphlab_lines.new_observed_node(node)
-    
-    for out_message in graph[node]:
-        edge=(out_message, node)
-        lhs=data[edge][1]
-        lhs=reshape(lhs, (len(lhs), 1))
-        rhs=[[observation]]
-        K=kernel.kernel(lhs, rhs)
-        graphlab_lines.add_observed_node(node, out_message, K)
-        
+# use the example class for dense matrix data that can be stored in memory
+precomputer=PrecomputeDenseMatrixKernelBP(graph, edges, data, observations, \
+                                          kernel, reg_lambda=0.1, output_filename="graph/graph.txt")
 
-# now precompute systems for inference
-
-# regulariser for matrix inversions
-reg_lambda=0.1
-
-print "precomputing systems for messages from observed nodes"
-graphlab_lines.lines.append(os.linesep + "# edges with observed targets")
-for node, observation in observations.items():
-    for out_message in graph[node]:
-        edge=(out_message, node)
-        graphlab_lines.new_edge_observed_target(node, out_message)
-        
-        data_source=data[edge][0]
-        data_source=reshape(data_source, (len(data_source), 1))
-        data_target=data[edge][1]
-        data_target=reshape(data_target, (len(data_target), 1))
-
-        Ks=kernel.kernel(data_source)
-        Kt=kernel.kernel(data_target)
-        
-        Ls=cholesky(Ks+eye(shape(Ks)[0])*reg_lambda)
-        Lt=cholesky(Kt+eye(shape(Kt)[0])*reg_lambda)
-        
-        graphlab_lines.add_edge(node, out_message,"L_s", Ls)
-        graphlab_lines.add_edge(node, out_message,"L_t", Lt)
-
-print "precomputing systems for messages from non-observed nodes"
-graphlab_lines.lines.append(os.linesep + "# edges with non-observed targets")
-for edge in edges:
-    # exclude edges which involve observed nodes
-    is_edge_target_observed=len(Set(observations.keys()).intersection(Set(edge)))>0
-    if not is_edge_target_observed:
-        graphlab_lines.new_edge_observed_target(edge[1], edge[0])
-        
-        data_source=data[edge][0]
-        data_source=reshape(data_source, (len(data_source), 1))
-        Ks=kernel.kernel(data_source)
-        Ls=cholesky(Ks+eye(shape(Ks)[0])*reg_lambda)
-        graphlab_lines.add_edge(edge[1], edge[0],"L_s", Ls)
-        
-# write graph definition file to disc
-graphlab_lines.flush()
+precomputer.precompute()
