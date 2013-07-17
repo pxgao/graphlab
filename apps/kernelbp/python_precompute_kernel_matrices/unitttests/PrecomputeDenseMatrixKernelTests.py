@@ -162,6 +162,7 @@ class PrecomputeDenseMatrixKernelTests(unittest.TestCase):
         """
         Based on the fixed data from above, calls graphlab and asserts that it
         outputs some fixed beta coefficients after convergence.
+        This is a nasty unit test which compiles graphlab and runs it locally.
         """
         
         # run graphlab as system call from folder within
