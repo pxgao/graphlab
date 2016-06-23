@@ -574,6 +574,7 @@ int main(int argc, char** argv) {
   graphlab::command_line_options clopts(description);
   std::string input_dir;
   std::string predictions;
+  std::string input_format;
   size_t interval = 10;
   std::string exec_type = "synchronous";
   clopts.attach_option("matrix", input_dir,
@@ -597,7 +598,9 @@ int main(int argc, char** argv) {
                        "The engine type synchronous or asynchronous");
   clopts.attach_option("regnormal", als_vertex_program::REGNORMAL, 
                        "regularization type. 1 = weighted according to neighbors num. 0 = no weighting - just lambda");
-  
+  clopts.attach_option("format", input_format,
+                       "input format: tsv, snap, adj, bin, graphjrl, bintsv4");
+                       
   parse_implicit_command_line(clopts);
   
   if(!clopts.parse(argc, argv) || input_dir == "") {
@@ -615,7 +618,8 @@ int main(int argc, char** argv) {
   dc.cout() << "Loading graph." << std::endl;
   graphlab::timer timer; 
   graph_type graph(dc, clopts);  
-  graph.load(input_dir, graph_loader); 
+  //graph.load(input_dir, graph_loader); 
+  graph.load_format(input_dir, input_format);
   dc.cout() << "Loading graph. Finished in " 
             << timer.current_time() << std::endl;
 
