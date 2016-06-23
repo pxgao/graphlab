@@ -389,7 +389,7 @@ ExternalProject_Add(libevent
 # graph data.
 ExternalProject_Add(libjson
   PREFIX ${GraphLab_SOURCE_DIR}/deps/json
-  URL http://graphlab.org/deps/libjson_7.6.0.zip
+  URL http://ftp2.ie.freesbie.org/pub/download.sourceforge.net/pub/sourceforge/l/li/libjson/libjson_7.6.0.zip
   URL_MD5 dcb326038bd9b710b8f717580c647833
   BUILD_IN_SOURCE 1
   CONFIGURE_COMMAND ""
