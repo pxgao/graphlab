@@ -426,7 +426,7 @@ int main(int argc, char** argv) {
   graphlab::command_line_options clopts(description);
   std::string input_dir;
   std::string predictions;
-  std::string input_format;
+  std::string input_format = "tsv";
   std::string exec_type = "synchronous";
   clopts.attach_option("matrix", input_dir,
       "The directory containing the matrix file");
