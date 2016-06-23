@@ -376,7 +376,7 @@ endmacro(requires_opencv)
 # TCP stack and the event handler threads
 ExternalProject_Add(libevent
   PREFIX ${GraphLab_SOURCE_DIR}/deps/event
-  URL http://iweb.dl.sourceforge.net/project/levent/libevent/libevent-2.0/libevent-2.0.18-stable.tar.gz
+  URL https://github.com/downloads/libevent/libevent/libevent-2.0.18-stable.tar.gz
   URL_MD5 aa1ce9bc0dee7b8084f6855765f2c86a
   CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --disable-openssl
   INSTALL_DIR ${GraphLab_SOURCE_DIR}/deps/local)
