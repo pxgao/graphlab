@@ -426,6 +426,7 @@ int main(int argc, char** argv) {
   graphlab::command_line_options clopts(description);
   std::string input_dir;
   std::string predictions;
+  std::string input_format;
   std::string exec_type = "synchronous";
   clopts.attach_option("matrix", input_dir,
       "The directory containing the matrix file");
@@ -442,6 +443,9 @@ int main(int argc, char** argv) {
   clopts.attach_option("minval", nmf_vertex_program::MINVAL, "min allowed value");
   clopts.attach_option("predictions", predictions,
       "The prefix (folder and filename) to save predictions.");
+  clopts.attach_option("format", input_format,
+      "input format: tsv, snap, adj, bin, graphjrl, bintsv4");
+
 
   if(!clopts.parse(argc, argv) || input_dir == "") {
     std::cout << "Error in parsing command line arguments." << std::endl;
@@ -456,7 +460,8 @@ int main(int argc, char** argv) {
   dc.cout() << "Loading graph." << std::endl;
   graphlab::timer timer; 
   graph_type graph(dc, clopts);  
-  graph.load(input_dir, graph_loader); 
+  //graph.load(input_dir, graph_loader); 
+  graph.load_format(input_dir, input_format);
   dc.cout() << "Loading graph. Finished in " 
     << timer.current_time() << std::endl;
   dc.cout() << "Finalizing graph." << std::endl;
