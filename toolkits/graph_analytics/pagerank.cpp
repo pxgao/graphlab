@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
   // Parse command line options -----------------------------------------------
   graphlab::command_line_options clopts("PageRank algorithm.");
   std::string graph_dir;
-  std::string format = "adj";
+  std::string format = "adj", oformat = "", opath;;
   std::string exec_type = "synchronous";
   clopts.attach_option("graph", graph_dir,
                        "The graph file.  If none is provided "
@@ -203,6 +203,8 @@ int main(int argc, char** argv) {
   clopts.attach_option("saveprefix", saveprefix,
                        "If set, will save the resultant pagerank to a "
                        "sequence of files with prefix saveprefix");
+  clopts.attach_option("oformat", oformat, "");
+  clopts.attach_option("opath", opath, "");
 
   if(!clopts.parse(argc, argv)) {
     dc.cout() << "Error in parsing command line arguments." << std::endl;
@@ -222,6 +224,7 @@ int main(int argc, char** argv) {
     clopts.get_engine_args().set_option("sched_allv", true);
   }
 
+  graphlab::timer timer;
   // Build the graph ----------------------------------------------------------
   graph_type graph(dc, clopts);
   if(powerlaw > 0) { // make a synthetic graph
@@ -242,6 +245,20 @@ int main(int argc, char** argv) {
   dc.cout() << "#vertices: " << graph.num_vertices()
             << " #edges:" << graph.num_edges() << std::endl;
 
+  dc.cout() << "Finished loading in " << timer.current_time() << "\n";
+
+  if (oformat != "")
+  {
+    std::cout << "converting graph\n";
+    graph.save_format(opath, oformat, false);
+    graphlab::mpi_tools::finalize();
+    return EXIT_SUCCESS;
+  }
+
+
+
+  graphlab::timer timer2;
+
   // Initialize the vertex data
   graph.transform_vertices(init_vertex);
 
@@ -253,6 +270,7 @@ int main(int argc, char** argv) {
   dc.cout() << "Finished Running engine in " << runtime
             << " seconds." << std::endl;
 
+  dc.cout() << "Finished compute in " << timer.current_time() << "\n";
 
   const double total_rank = graph.map_reduce_vertices<double>(map_rank);
   std::cout << "Total rank: " << total_rank << std::endl;

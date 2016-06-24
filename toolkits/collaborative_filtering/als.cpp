@@ -574,9 +574,7 @@ int main(int argc, char** argv) {
   graphlab::command_line_options clopts(description);
   std::string input_dir;
   std::string predictions;
-  std::string input_format = "tsv", oformat, opath;
-  std::string output_format = "";
-  std::string output_path = "";
+  std::string input_format = "tsv", oformat = "", opath = "";
   size_t interval = 10;
   std::string exec_type = "synchronous";
   clopts.attach_option("matrix", input_dir,
@@ -602,10 +600,8 @@ int main(int argc, char** argv) {
                        "regularization type. 1 = weighted according to neighbors num. 0 = no weighting - just lambda");
   clopts.attach_option("format", input_format,
                        "input format: tsv, snap, adj, bin, graphjrl, bintsv4");
-  clopts.attach_option("format", input_format,
-                       "input format: tsv, snap, adj, bin, graphjrl, bintsv4");
-  clopts.attach_option("oformat", output_format, "");
-  clopts.attach_option("opath", output_path, "");
+  clopts.attach_option("oformat", oformat, "");
+  clopts.attach_option("opath", opath, "");
                        
   parse_implicit_command_line(clopts);
   
@@ -639,9 +635,9 @@ int main(int argc, char** argv) {
             << timer.current_time() << std::endl;
 
 
+  std::cout << "oformat " << oformat << "\n";
 
-
-  if (oformat != "")
+  if (oformat.compare("") != 0)
   {
     std::cout << "converting graph\n";
     graph.save_format(opath, oformat, false);

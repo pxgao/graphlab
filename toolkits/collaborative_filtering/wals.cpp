@@ -573,6 +573,7 @@ int main(int argc, char** argv) {
   graphlab::command_line_options clopts(description);
   std::string input_dir, output_dir;
   std::string predictions;
+  std::string input_format = "tsv";
   size_t interval = 10;
   std::string exec_type = "synchronous";
   clopts.attach_option("matrix", input_dir,
@@ -594,6 +595,8 @@ int main(int argc, char** argv) {
                        "The prefix (folder and filename) to save predictions.");
   clopts.attach_option("engine", exec_type, 
                        "The engine type synchronous or asynchronous");
+  clopts.attach_option("format", input_format,
+                       "input format: tsv, snap, adj, bin, graphjrl, bintsv4");
   // clopts.attach_option("remap", REMAP_TARGET,
   //                      "Renumber target vertex ids (internally) so that they\n" 
   //                      "are in a different range allowing user 0 to connect to movie 0");
@@ -612,7 +615,8 @@ int main(int argc, char** argv) {
   dc.cout() << "Loading graph." << std::endl;
   graphlab::timer timer; 
   graph_type graph(dc, clopts);  
-  graph.load(input_dir, graph_loader); 
+  //graph.load(input_dir, graph_loader); 
+  graph.load_format(input_dir, input_format);
   dc.cout() << "Loading graph. Finished in " 
             << timer.current_time() << std::endl;
 
