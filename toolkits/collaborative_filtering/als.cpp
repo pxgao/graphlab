@@ -574,7 +574,9 @@ int main(int argc, char** argv) {
   graphlab::command_line_options clopts(description);
   std::string input_dir;
   std::string predictions;
-  std::string input_format = "tsv";
+  std::string input_format = "tsv", oformat, opath;
+  std::string output_format = "";
+  std::string output_path = "";
   size_t interval = 10;
   std::string exec_type = "synchronous";
   clopts.attach_option("matrix", input_dir,
@@ -600,6 +602,10 @@ int main(int argc, char** argv) {
                        "regularization type. 1 = weighted according to neighbors num. 0 = no weighting - just lambda");
   clopts.attach_option("format", input_format,
                        "input format: tsv, snap, adj, bin, graphjrl, bintsv4");
+  clopts.attach_option("format", input_format,
+                       "input format: tsv, snap, adj, bin, graphjrl, bintsv4");
+  clopts.attach_option("oformat", output_format, "");
+  clopts.attach_option("opath", output_path, "");
                        
   parse_implicit_command_line(clopts);
   
@@ -631,6 +637,20 @@ int main(int argc, char** argv) {
    graph.finalize();
   dc.cout() << "Finalizing graph. Finished in " 
             << timer.current_time() << std::endl;
+
+
+
+
+  if (oformat != "")
+  {
+    std::cout << "converting graph\n";
+    graph.save_format(opath, oformat, false);
+    graphlab::mpi_tools::finalize();
+    return EXIT_SUCCESS;
+  }
+
+
+
 
 
   dc.cout() 
